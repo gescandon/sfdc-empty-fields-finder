@@ -1,0 +1,24 @@
+<apex:page id="page" controller="EmptyFieldsController">
+<apex:form id="form">
+  <apex:actionFunction name="findEmpties" action="{!findEmptyFields}" rerender="results" status="myStatus"/>
+  <apex:pageBlock id="block" title="Empty Fields Finder">
+    <apex:pageBlockSection id="search">
+      <apex:pageBlockSectionItem >
+        <apex:outputLabel value="Select Object" for="account__name"/>
+        <apex:selectList value="{!selectedObj}" onchange="findEmpties()" size="1">
+            <apex:selectOptions value="{!objectOptions}"/>
+        </apex:selectList>
+      </apex:pageBlockSectionItem>
+    </apex:pageBlockSection> 
+    <apex:outputPanel style="border: 1px solid grey; background:#FFFFCC; padding: 20px; margin:20px;" layout="block" id="disclaimer">
+      This tool is designed to be fast. It may not be 100% accurate for large datasets. Please confirm empty fields before doing any drastic.
+    </apex:outputPanel>
+    <apex:outputPanel id="results">
+    <apex:outputText style="font-weight:bold" value="Empty Fields for {!selectedObj}: {!resultMessage}"/>
+    <apex:dataList value="{!emptyFields}" var="ef">
+        <apex:outputText value="{!ef}"/>
+    </apex:dataList>  
+    </apex:outputPanel>    
+  </apex:pageBlock>
+</apex:form>
+</apex:page>
