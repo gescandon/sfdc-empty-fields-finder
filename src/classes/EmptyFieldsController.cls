@@ -14,8 +14,11 @@ public with sharing class EmptyFieldsController {
   public String selectedObj {get;set;}
   public List<String> emptyFields {get;set;}
   public String resultMessage {get;set;}
+  Integer DEFAULT_DEPTH = 100;
+  public Integer depth {get;set;}
+  
   public EmptyFieldsController() {
-    
+    depth = DEFAULT_DEPTH;  
   }
   
   public List<SelectOption> getObjectOptions() {
@@ -41,6 +44,7 @@ public with sharing class EmptyFieldsController {
     }
     
     emptyFields = new List<String>();
+
     Schema.DescribeSObjectResult r = objectMap.get(selectedObj).getDescribe();
   
     Map<String, Schema.SObjectField> fieldMap = r.fields.getMap();
@@ -71,6 +75,7 @@ public with sharing class EmptyFieldsController {
   
   public List<String> queryEmptyFields(String objName, Set<String> fieldSet, Boolean includeWhere) {
     List<String> results = new List<String>();
+    depth = 2 * depth; // each query looks a little deeper
     
     String query = 'select ';
     for (String key : fieldSet) {
@@ -88,23 +93,29 @@ public with sharing class EmptyFieldsController {
       }
       query = query.substring(0, query.length() - 4);
     }
-    query += ' limit 100';
-    System.debug(query);
-    
-    List<Sobject> sobList = Database.query(query);
+    query += ' limit ' + String.valueOf(depth);
     
     Set<String> remains = new Set<String>();
-    remains.addAll(fieldSet);
-    for (Sobject sob :sobList) {
-      for (String key : fieldSet) {
-        if (sob.get(key) != null) {
-          remains.remove(key);
-        }
-        if (remains.size() == 0) {
-          return results;
+      
+    try {
+      List<Sobject> sobList = Database.query(query);
+      remains.addAll(fieldSet);
+      for (Sobject sob :sobList) {
+        for (String key : fieldSet) {
+          if (sob.get(key) != null) {
+            remains.remove(key);
+          }
+          if (remains.size() == 0) {
+            return results;
+          }
         }
       }
+    } catch (Exception e) {
+      String emsg = e.getMessage();
+      ApexPages.addMessages(e);
+      return results;
     }
+    
     
     
     if (remains.size() < fieldSet.size()) {
