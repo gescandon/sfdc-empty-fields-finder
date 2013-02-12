@@ -1,12 +1,17 @@
-<apex:page id="page" controller="EmptyFieldsController">
+<apex:page id="page" controller="EmptyFieldsController" readOnly="true">
 <apex:form id="form">
   <apex:actionFunction name="findEmpties" action="{!findEmptyFields}" rerender="results" status="myStatus"/>
+  <apex:actionFunction name="updateObjects" action="{!updateObjects}" rerender="search" status="myStatus"/>
   <apex:messages />
   <apex:pageBlock id="block" title="Empty Fields Finder">
-    <apex:pageBlockSection id="search" columns="1">
+    <apex:pageBlockSection id="search" columns="2">
       <apex:pageBlockSectionItem >
         <apex:outputLabel value="Depth" for="depth"/>
         <apex:inputText value="{!depth}"/>
+      </apex:pageBlockSectionItem>
+      <apex:pageBlockSectionItem >
+        <apex:outputLabel value="Search All Objects" for="searchAll"/>
+        <apex:inputCheckbox value="{!searchAllObjects}"  onchange="updateObjects()" />
       </apex:pageBlockSectionItem>
       <apex:pageBlockSectionItem >
         <apex:outputLabel value="Select Object" for="account__name"/>
@@ -16,8 +21,7 @@
       </apex:pageBlockSectionItem>
     </apex:pageBlockSection> 
     <apex:outputPanel style="border: 1px solid grey; background:#FFFFCC; padding: 20px; margin:20px;" layout="block" id="disclaimer">
-      <p>Disclaimer: This tool is designed to be fast. It may not be 100% accurate for large datasets. Please confirm empty fields before doing any drastic.</p>
-      <p>Depth: How deep to search. Objects with many empty fields may not be searched too deeply. If you search too deep, governor limits will be exceeded.</p>
+      <p>Initial Depth: Number of records in initial search. Objects with many empty fields may not be searched too deeply. If you search too deep, governor limits will be exceeded.</p>
        Suggestions: 
        <ul>
        <li>10 Empty Fields : Depth 500</li>
@@ -28,7 +32,8 @@
     <apex:outputText style="font-weight:bold" value="Empty Fields for {!selectedObj}: {!resultMessage}"/>
     <apex:dataList value="{!emptyFields}" var="ef">
         <apex:outputText value="{!ef}"/>
-    </apex:dataList>  
+    </apex:dataList> 
+    <apex:outputText style="font-style:italics" value="{!finalSoql}"/> 
     </apex:outputPanel>    
   </apex:pageBlock>
 </apex:form>
